@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Platform</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <button class="fullscreen-toggle-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">
+            <span class="fullscreen-icon">⛶</span>
+        </button>
+        <button class="toggle-quiz-btn" onclick="toggleQuiz()">
+            <span class="toggle-icon">◀</span>
+        </button>
+        <div class="quiz-form">
+            <h1>Quiz Setup</h1>
+            
+            <div class="form-group">
+                <label for="subject">Select Subject</label>
+                <select id="subject" onchange="toggleOtherSubject()">
+                    <option value="">Choose a subject...</option>
+                    <option value="PC">PC</option>
+                    <option value="IOC">IOC</option>
+                    <option value="OC">OC</option>
+                    <option value="Maths">Maths</option>
+                    <option value="Physics">Physics</option>
+                    <option value="other">Other</option>
+                </select>
+                <input type="text" id="otherSubject" placeholder="Enter subject name" style="display: none;">
+            </div>
+
+            <div class="form-group">
+                <label for="chapter">Chapter</label>
+                <input type="text" id="chapter" placeholder="Enter chapter name">
+            </div>
+
+            <div class="form-group">
+                <label for="questionCount">Number of Questions</label>
+                <input type="number" id="questionCount" min="1" placeholder="Enter number of questions">
+            </div>
+
+            <button class="btn primary" onclick="startQuiz()">Start Quiz</button>
+            <button class="btn secondary" onclick="viewStats()">View Statistics</button>
+        </div>
+
+        <div class="quiz-container" style="display: none;">
+            <div class="quiz-header">
+                <div class="timer">
+                    <span id="timerDisplay">00:00</span>
+                </div>
+                <div class="question-counter">
+                    Question <span id="currentQuestion">1</span> of <span id="totalQuestions">5</span>
+                </div>
+            </div>
+
+            <div class="question-container">
+                <h2 id="questionText" class="centered-text">Question 1</h2>
+                
+                <div class="options-container">
+                    <div class="option-row">
+                        <div class="option" onclick="selectOption('a')">
+                            <input type="radio" name="answer" id="optionA" class="hidden-radio">
+                            <div class="option-label">A</div>
+                        </div>
+                        <div class="option" onclick="selectOption('b')">
+                            <input type="radio" name="answer" id="optionB" class="hidden-radio">
+                            <div class="option-label">B</div>
+                        </div>
+                    </div>
+                    <div class="option-row">
+                        <div class="option" onclick="selectOption('c')">
+                            <input type="radio" name="answer" id="optionC" class="hidden-radio">
+                            <div class="option-label">C</div>
+                        </div>
+                        <div class="option" onclick="selectOption('d')">
+                            <input type="radio" name="answer" id="optionD" class="hidden-radio">
+                            <div class="option-label">D</div>
+                        </div>
+                    </div>
+                    <div class="option custom-option" onclick="selectOption('e')">
+                        <input type="radio" name="answer" id="optionE" class="hidden-radio">
+                        <div class="option-label">E</div>
+                        <input type="text" id="customAnswer" placeholder="Enter your answer..." disabled>
+                    </div>
+                </div>
+
+                <div class="quiz-buttons">
+                    <button class="btn primary" id="submitBtn" onclick="submitAnswer()" disabled>Submit Answer</button>
+                </div>
+                <div class="quiz-buttons check-answers">
+                    <button class="btn tertiary" onclick="checkAnswers()">Check Answers</button>
+                </div>
+            </div>
+        </div>
+
+        <button class="nav-toggle-btn" onclick="toggleNavigation()">&#9660;</button>
+
+        <div class="question-navigation">
+            <div class="nav-bubbles" id="questionBubbles">
+                <!-- Bubbles will be added dynamically -->
+            </div>
+        </div>
+
+        <div class="answers-modal" id="answersModal" style="display: none;">
+            <div class="modal-content">
+                <h2>Check Answers</h2>
+                <div class="answers-list" id="answersList">
+                    <!-- Answers will be added dynamically -->
+                </div>
+                <div class="modal-buttons">
+                    <button class="btn primary modal-btn" onclick="submitAnswerCheck()">Submit</button>
+                    <button class="btn secondary modal-btn" onclick="closeAnswersModal()">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="statistics-modal" id="statisticsModal" style="display: none;">
+            <div class="modal-content statistics-content">
+                <h2>Statistics Dashboard</h2>
+                
+                <div class="stats-tabs">
+                    <button class="tab-btn active" data-tab="daily" onclick="switchTab('daily')">Daily Stats</button>
+                    <button class="tab-btn" data-tab="weekly" onclick="switchTab('weekly')">Weekly Stats</button>
+                    <button class="tab-btn" data-tab="chapter" onclick="switchTab('chapter')">Chapterwise</button>
+                </div>
+                
+                <div class="date-selector daily-selector">
+                    <button class="nav-btn" onclick="navigateDate('prev', 'daily')">←</button>
+                    <div class="date-display" id="dailyDateDisplay">Today</div>
+                    <button class="nav-btn" onclick="navigateDate('next', 'daily')" id="nextDayBtn" disabled>→</button>
+                </div>
+                
+                <!-- Daily Stats Content -->
+                <div class="stats-content" id="dailyStats">
+                    <div class="streak-cards-container">
+                        <!-- Cards will be added dynamically -->
+                    </div>
+                    <div class="stats-overview">
+                        <div class="stats-card">
+                            <h3>Total Questions</h3>
+                            <p id="dailyTotal">0</p>
+                        </div>
+                        <div class="stats-card">
+                            <h3>Correct</h3>
+                            <p id="dailyCorrect">0</p>
+                        </div>
+                        <div class="stats-card">
+                            <h3>Incorrect</h3>
+                            <p id="dailyIncorrect">0</p>
+                        </div>
+                        <div class="stats-card">
+                            <h3>Accuracy</h3>
+                            <p id="dailyAccuracy">0%</p>
+                        </div>
+                        <div class="stats-card">
+                            <h3>Avg. Time</h3>
+                            <p id="dailyAvgTime">0s</p>
+                        </div>
+                    </div>
+
+                    <div class="charts-container">
+                        <div class="chart-wrapper">
+                            <canvas id="dailyPieChart"></canvas>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="dailySubjectChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="subject-stats" id="dailySubjectStats">
+                        <!-- Subject stats will be added dynamically -->
+                    </div>
+                </div>
+
+                <div class="date-selector weekly-selector">
+                    <button class="nav-btn" onclick="navigateDate('prev', 'weekly')">Previous Week</button>
+                    <div class="date-display" id="weeklyDateDisplay">This Week</div>
+                    <button class="nav-btn" onclick="navigateDate('next', 'weekly')" id="nextWeekBtn" disabled>Next Week</button>
+                </div>
+
+                <!-- Weekly Stats Content -->
+                <div class="stats-content" id="weeklyStats" style="display: none;">
+                    <div class="stats-overview">
+                        <div class="stats-card">
+                            <h3>Total Questions</h3>
+                            <p id="weeklyTotal">0</p>
+                        </div>
+                        <div class="stats-card">
+                            <h3>Correct</h3>
+                            <p id="weeklyCorrect">0</p>
+                        </div>
+                        <div class="stats-card">
+                            <h3>Incorrect</h3>
+                            <p id="weeklyIncorrect">0</p>
+                        </div>
+                        <div class="stats-card">
+                            <h3>Accuracy</h3>
+                            <p id="weeklyAccuracy">0%</p>
+                        </div>
+                        <div class="stats-card">
+                            <h3>Avg. Time</h3>
+                            <p id="weeklyAvgTime">0s</p>
+                        </div>
+                    </div>
+
+                    <div class="charts-container">
+                        <div class="chart-wrapper">
+                            <canvas id="weeklyPieChart"></canvas>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="weeklySubjectChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="subject-stats" id="weeklySubjectStats">
+                        <!-- Subject stats will be added dynamically -->
+                    </div>
+                </div>
+
+                <!-- Chapterwise Stats Content -->
+                <div class="stats-content" id="chapterStats" style="display: none;">
+                    <div class="chapter-filter">
+                        <select id="chapterSubjectFilter" onchange="filterChapterStats()">
+                            <option value="">All Subjects</option>
+                            <!-- Subjects will be added dynamically -->
+                        </select>
+                    </div>
+
+                    <div class="stats-overview">
+                        <div class="stats-card">
+                            <h3>Total Chapters</h3>
+                            <p id="totalChapters">0</p>
+                        </div>
+                        <div class="stats-card">
+                            <h3>Questions</h3>
+                            <p id="chapterTotal">0</p>
+                        </div>
+                        <div class="stats-card">
+                            <h3>Accuracy</h3>
+                            <p id="chapterAccuracy">0%</p>
+                        </div>
+                        <div class="stats-card">
+                            <h3>Avg. Time</h3>
+                            <p id="chapterAvgTime">0s</p>
+                        </div>
+                    </div>
+
+                    <div class="charts-container">
+                        <div class="chart-wrapper">
+                            <canvas id="chapterPerformanceChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chapter-list" id="chapterStatsList">
+                        <!-- Chapter stats will be added dynamically -->
+                    </div>
+                </div>
+
+                <button class="btn secondary close-btn" onclick="closeStatisticsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="pdf-container">
+        <button class="pdf-toggle-btn" onclick="togglePdfControls()">
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="pdf-controls">
+            <div class="pdf-buttons">
+                <input type="file" id="pdfFile" accept=".pdf" style="display: none;" onchange="loadPDF(event)">
+                <button class="pdf-btn" onclick="document.getElementById('pdfFile').click()">
+                    <span class="pdf-btn-icon">📄</span>
+                    Open PDF
+                </button>
+                <button class="pdf-btn" onclick="previousPage()">
+                    <span class="pdf-btn-icon">⬆️</span>
+                    Previous Page
+                </button>
+                <button class="pdf-btn" onclick="nextPage()">
+                    <span class="pdf-btn-icon">⬇️</span>
+                    Next Page
+                </button>
+                <button class="pdf-btn" onclick="zoomIn()">
+                    <span class="pdf-btn-icon">🔍+</span>
+                    Zoom In
+                </button>
+                <button class="pdf-btn" onclick="zoomOut()">
+                    <span class="pdf-btn-icon">🔍-</span>
+                    Zoom Out
+                </button>
+            </div>
+        </div>
+        <div id="pdfViewer"></div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="statistics.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+</body>
+</html> 
